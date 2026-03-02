@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Revestir - Por Ilha</title>
+    <style>
+        :root {
+            --primary: #1a2a3a;
+            --accent: #27ae60;
+            --ilha-color: #8e44ad;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-card {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: bold; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .ilha-badge {
+            display: inline-block;
+            background: var(--ilha-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+
+        .ref-code { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        .description { font-size: 0.85rem; color: #7f8c8d; margin: 5px 0 12px 0; line-height: 1.4; }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            border-top: 1px dashed #eee;
+            padding-top: 10px;
+        }
+
+        .price-box { font-size: 0.8rem; color: #666; }
+        .price-box strong { display: block; font-size: 1rem; color: #333; }
+
+        .final-price-box {
+            grid-column: span 2;
+            background: #ebf5ee;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--accent);
+            margin-top: 8px;
+        }
+
+        .final-price-box span { color: var(--accent); font-weight: bold; font-size: 1.4rem; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div style="text-align: center; margin-bottom: 15px;">
+        <h1 style="font-size: 1.3rem; margin: 0; color: var(--primary);">Busca por Ilha / Ref</h1>
+    </div>
+
+    <div class="control-group">
+        <label>PESQUISAR (ILHA, REF OU PRODUTO)</label>
+        <input type="text" id="search" placeholder="Ex: Ilha 01, LX3388...">
+
+        <label>DESCONTO NO PREÇO BASE (%)</label>
+        <input type="number" id="discount" value="0" min="0" max="100">
+    </div>
+
+    <div id="results-list">
+        </div>
+</div>
+
+<script>
+    // Dados simulados com base no seu CSV (adicionei a coluna 'ilha')
+    const database = [
+        { ilha: "ILHA 01", ref: "LX3388", desc: "MISTURADOR MONOC. GOURMET CROMADO", preco: 1848.94, ecom: 3149.59 },
+        { ilha: "ILHA 01", ref: "LX3388GF", desc: "MISTURADOR MONOC. GOURMET GRAFITE", preco: 2147.16, ecom: 3657.61 },
+        { ilha: "ILHA 02", ref: "LX91BM", desc: "MANGUEIRA FLEXIVEL 1,8 MTS - BLACK MATTE", preco: 104.78, ecom: 194.10 },
+        { ilha: "ILHA 02", ref: "LX91G", desc: "MANGUEIRA FLEXIVEL 1,8 MTS - GOLD", preco: 104.78, ecom: 194.10 },
+        { ilha: "ILHA 03", ref: "LX91GF", desc: "MANGUEIRA FLEXIVEL 1,8 MTS - GRAFITE", preco: 104.16, ecom: 192.96 }
+    ];
+
+    const searchInput = document.getElementById('search');
+    const discountInput = document.getElementById('discount');
+    const resultsContainer = document.getElementById('results-list');
+
+    function formatCurrency(val) {
+        return val.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+    }
+
+    function updateResults() {
+        const term = searchInput.value.toLowerCase();
+        const discount = parseFloat(discountInput.value) || 0;
+
+        if (term.length < 1) {
+            resultsContainer.innerHTML = '<p style="text-align:center; color:#999;">Digite a Ilha ou Referência...</p>';
+            return;
+        }
+
+        const filtered = database.filter(item => 
+            item.ilha.toLowerCase().includes(term) ||
+            item.ref.toLowerCase().includes(term) || 
+            item.desc.toLowerCase().includes(term)
+        );
+
+        resultsContainer.innerHTML = '';
+
+        filtered.forEach(item => {
+            const discountedPrice = item.preco * (1 - (discount / 100));
+            
+            resultsContainer.innerHTML += `
+                <div class="result-item">
+                    <span class="ilha-badge">📍 ${item.ilha}</span>
+                    <div class="ref-code">${item.ref}</div>
+                    <div class="description">${item.desc}</div>
+                    <div class="price-grid">
+                        <div class="price-box">Preço Base: <strong>${formatCurrency(item.preco)}</strong></div>
+                        <div class="price-box">E-commerce: <strong>${formatCurrency(item.ecom)}</strong></div>
+                        <div class="final-price-box">
+                            <small>VALOR COM ${discount}% DE DESCONTO</small>
+                            <span>${formatCurrency(discountedPrice)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; color:#999;">Nada encontrado.</p>';
+        }
+    }
+
+    searchInput.addEventListener('input', updateResults);
+    discountInput.addEventListener('input', updateResults);
+    
+    // Iniciar vazio
+    updateResults();
+</script>
+
+</body>
+</html>
