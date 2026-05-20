@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexxa Metais - Mapeamento de Similares</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        h1 { color: #111; text-align: center; margin-bottom: 5px; font-weight: 600; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: 14px; }
+        
+        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
+        input { flex: 1; padding: 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; transition: border 0.2s; }
+        input:focus { border-color: #bba15c; box-shadow: 0 0 0 2px rgba(187, 161, 92, 0.2); }
+        
+        .grid-resultados { display: grid; gap: 25px; }
+        
+        /* Cartão mestre por produto Lexxa */
+        .card-mapeamento { border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; flex-direction: row; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        
+        /* Lado Esquerdo: Produto Principal Lexxa */
+        .bloco-lexxa { flex: 0 0 280px; background: #fffdf2; border-right: 2px dashed #eadeb8; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; }
+        
+        /* Lado Direito: Grid de Concorrentes Equivalentes */
+        .grid-concorrentes { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; padding: 20px; background: white; align-items: start; }
+        
+        .item-produto { display: flex; flex-direction: column; align-items: center; text-align: center; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 12px; position: relative; }
+        
+        /* Containers de Imagem */
+        .foto-container { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee; border-radius: 6px; margin: 10px 0; padding: 5px; }
+        .foto-produto { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .badge { display: inline-block; padding: 4px 8px; background: #e0e0e0; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge.lexxa { background: #bba15c; color: white; font-size: 11px; }
+        
+        h3 { margin: 8px 0 4px 0; font-size: 15px; color: #222; }
+        p { margin: 0; font-size: 13px; color: #666; }
+        
+        .sem-foto { font-size: 11px; color: #aaa; text-align: center; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mapeamento de Similares de Cozinha</h1>
+    <div class="subtitle">Comparações Lexa x Concorrentes</div>
+    
+    <div class="search-box">
+        <input type="text" id="busca" placeholder="Busque por Lexxa ou Concorrente (Ex: Harco, Artico, Spin, Deca, Docol...)" oninput="buscarSimilar()">
+    </div>
+
+    <div id="resultados" class="grid-resultados">
+        </div>
+</div>
+
+<script>
+// Banco de dados corrigido e alinhado exatamente linha por linha com a sua planilha
+const baseSimilares = [
+    {
+        lexxa_nome: "ARTICO",
+        lexxa_img: "ARTICO.jpg",
+        concorrentes: [
+            { marca: "DOCOL", codigo: "ORBIT", img: "ORBIT.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "HARCO",
+        lexxa_img: "HARCO.jpg", // CORRIGIDO: Agora o sistema busca pela imagem HARCO.jpg
+        concorrentes: [
+            { marca: "DECA", codigo: "URBAN", img: "URBAN.jpg" },
+            { marca: "DECA", codigo: "2280C", img: "2280C.jpg" },
+            { marca: "DOCOL", codigo: "DOC", img: "DOC.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB3362", img: "RB3362.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB3396", img: "RB3396.jpg" },
+            { marca: "DOKA", codigo: "AEREA", img: "AEREA.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "BOOL",
+        lexxa_img: "BOOL.jpg",
+        concorrentes: [
+            { marca: "DECA", codigo: "SPIN", img: "SPIN.jpg" },
+            { marca: "DOCOL", codigo: "MANGIARE", img: "MAGIARE.jpg" },
+            { marca: "DOKA", codigo: "FERME", img: "" }
+        ]
+    },
+    {
+        lexxa_nome: "FRAME",
+        lexxa_img: "",
+        concorrentes: [
+            { marca: "DECA", codigo: "LEVEL", img: "" },
+            { marca: "DOCOL", codigo: "LIFT", img: "LIFT.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB3401", img: "RB3401.jpg" },
+            { marca: "DOKA", codigo: "NEORA", img: "NEORA.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "REEL",
+        lexxa_img: "REEL.jpg",
+        concorrentes: [
+            { marca: "DECA", codigo: "SPIN", img: "SPIN.jpg" },
+            { marca: "DOCOL", codigo: "BOLD", img: "BOLD.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "QUARK",
+        lexxa_img: "QUARK.jpg",
+        concorrentes: [
+            { marca: "DECA", codigo: "SPIN", img: "SPIN.jpg" },
+            { marca: "DOCOL", codigo: "CHOICE", img: "CHOICE.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB3150", img: "RB3150.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "CONIQ",
+        lexxa_img: "CONIQ.jpg",
+        concorrentes: [
+            { marca: "DECA", codigo: "LEVEL GOURMET", img: "" },
+            { marca: "DOCOL", codigo: "DOC", img: "DOC.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB3396", img: "RB3396.jpg" },
+            { marca: "DOKA", codigo: "AEREA", img: "AEREA.jpg" }
+        ]
+    },
+    {
+        lexxa_nome: "LARIS",
+        lexxa_img: "",
+        concorrentes: [
+            { marca: "DECA", codigo: "DECA YOU", img: "DECA YOU.jpg" },
+            { marca: "DOCOL", codigo: "MIX & MATCH", img: "MIX & MATCH.jpg" },
+            { marca: "RUBINETTOS", codigo: "RB33865", img: "RB33865.jpg" },
+            { marca: "DOKA", codigo: "MODU", img: "MODU.jpg" }
+        ]
+    }
+];
+
+function buscarSimilar() {
+    const termo = document.getElementById('busca').value.toLowerCase().trim();
+    const container = document.getElementById('resultados');
+    container.innerHTML = '';
+
+    if (termo === '') return;
+
+    const filtrados = baseSimilares.filter(item => {
+        const bateLexxa = item.lexxa_nome.toLowerCase().includes(termo);
+        const bateConcorrente = item.concorrentes.some(c => 
+            c.marca.toLowerCase().includes(termo) || 
+            c.codigo.toLowerCase().includes(termo)
+        );
+        return bateLexxa || bateConcorrente || termo === 'lexxa';
+    });
+
+    if (filtrados.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#777; font-size: 14px;">Nenhum produto correspondente encontrado.</p>';
+        return;
+    }
+
+    filtrados.forEach(item => {
+        const cardMestre = document.createElement('div');
+        cardMestre.className = 'card-mapeamento';
+        
+        const imgLexxa = item.lexxa_img 
+            ? `<img class="foto-produto" src="${item.lexxa_img}" alt="${item.lexxa_nome}">` 
+            : `<div class="sem-foto">Sem Imagem</div>`;
+
+        let htmlLexxa = `
+            <div class="bloco-lexxa">
+                <span class="badge lexxa">LEXXA</span>
+                <div class="foto-container">${imgLexxa}</div>
+                <h3>${item.lexxa_nome}</h3>
+            </div>
+        `;
+
+        let htmlConcorrentes = `<div class="grid-concorrentes">`;
+        
+        item.concorrentes.forEach(c => {
+            const imgC = c.img 
+                ? `<img class="foto-produto" src="${c.img}" alt="${c.codigo}">` 
+                : `<div class="sem-foto">Imagem não<br>cadastrada</div>`;
+                
+            htmlConcorrentes += `
+                <div class="item-produto">
+                    <span class="badge">${c.marca}</span>
+                    <div class="foto-container">${imgC}</div>
+                    <h3>${c.codigo}</h3>
+                </div>
+            `;
+        });
+        
+        htmlConcorrentes += `</div>`;
+
+        cardMestre.innerHTML = htmlLexxa + htmlConcorrentes;
+        container.appendChild(cardMestre);
+    });
+}
+</script>
+
+</body>
+</html>
