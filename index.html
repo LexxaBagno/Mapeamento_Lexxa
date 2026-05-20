@@ -5,49 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lexxa Metais - Mapeamento de Similares</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        h1 { color: #111; text-align: center; margin-bottom: 5px; font-weight: 600; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: 14px; }
+        /* Estilos Gerais (Foco em Performance Mobile) */
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 10px; color: #333; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
-        input { flex: 1; padding: 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; transition: border 0.2s; }
+        h1 { color: #111; text-align: center; margin: 10px 0 5px 0; font-size: 22px; font-weight: 600; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 13px; padding: 0 10px; }
+        
+        /* Campo de Busca Otimizado para Dedos */
+        .search-box { display: flex; margin-bottom: 20px; }
+        input { flex: 1; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.2s; -webkit-appearance: none; }
         input:focus { border-color: #bba15c; box-shadow: 0 0 0 2px rgba(187, 161, 92, 0.2); }
         
-        .grid-resultados { display: grid; gap: 25px; }
+        .grid-resultados { display: grid; gap: 20px; }
         
-        /* Layout mestre por produto Lexxa */
+        /* Layout Mestre Adaptável (Flex-direction muda no Mobile) */
         .card-mapeamento { border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; flex-direction: row; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         
-        /* Lado Esquerdo: Produto Principal Lexxa */
-        .bloco-lexxa { flex: 0 0 280px; background: #fffdf2; border-right: 2px dashed #eadeb8; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; }
+        /* Bloco Esquerdo: Produto Lexxa */
+        .bloco-lexxa { flex: 0 0 260px; background: #fffdf2; border-right: 2px dashed #eadeb8; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; }
         
-        /* Lado Direito: Grid de Concorrentes Equivalentes */
-        .grid-concorrentes { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; padding: 20px; background: white; align-items: start; }
+        /* Bloco Direito: Grid de Concorrentes */
+        .grid-concorrentes { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 15px; background: white; align-items: start; }
         
-        .item-produto { display: flex; flex-direction: column; align-items: center; text-align: center; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 12px; position: relative; }
+        /* Cards Individuais de Produtos */
+        .item-produto { display: flex; flex-direction: column; align-items: center; text-align: center; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 10px; }
         
-        /* Containers de Imagem */
-        .foto-container { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee; border-radius: 6px; margin: 10px 0; padding: 5px; }
+        /* Ajuste Fino das Imagens para nunca estourarem a tela */
+        .foto-container { width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee; border-radius: 6px; margin: 8px 0; padding: 5px; }
         .foto-produto { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .badge { display: inline-block; padding: 4px 8px; background: #e0e0e0; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* Badges Identificadoras */
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; background: #e0e0e0; color: #444; }
         .badge.lexxa { background: #bba15c; color: white; font-size: 11px; }
         
-        h3 { margin: 8px 0 4px 0; font-size: 15px; color: #222; }
-        p { margin: 0; font-size: 13px; color: #666; }
-        
+        h3 { margin: 6px 0 2px 0; font-size: 14px; color: #222; }
         .sem-foto { font-size: 11px; color: #aaa; text-align: center; font-style: italic; }
+
+        /* ==========================================================================
+           REGRAS DE OURO PARA CELULAR (MEDIA QUERY MOBILE)
+           ========================================================================== */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            .container { padding: 12px; }
+            h1 { font-size: 19px; }
+            
+            /* Transforma o layout em uma coluna vertical e remove a borda lateral */
+            .card-mapeamento { flex-direction: column; }
+            .bloco-lexxa { flex: none; border-right: none; border-bottom: 2px dashed #eadeb8; padding: 15px; }
+            
+            /* Força os concorrentes a ficarem organizados em 2 colunas no celular para poupar espaço */
+            .grid-concorrentes { grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 8px; }
+            .foto-container { width: 95px; height: 95px; }
+            h3 { font-size: 13px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Mapeamento de Similares de Cozinha</h1>
+    <h1>Mapeamento de Similares</h1>
     <div class="subtitle">LEXXA</div>
     
     <div class="search-box">
-        <input type="text" id="busca" placeholder="Busque por Lexxa ou Concorrente (Ex: Harco, Frame, Laris, Level, Spin...)" oninput="buscarSimilar()">
+        <input type="text" id="busca" placeholder="Busque por produto ou marca (Ex: Harco, Frame, Laris, Deca, Docol...)" oninput="buscarSimilar()">
     </div>
 
     <div id="resultados" class="grid-resultados">
@@ -55,7 +76,7 @@
 </div>
 
 <script>
-// AJUSTADO: Nomes dos arquivos de imagem exatamente em MAIÚSCULO (.jpg) para bater com o seu GitHub
+// Banco de dados idêntico à planilha oficial com imagens em MAIÚSCULO
 const baseSimilares = [
     {
         lexxa_nome: "ARTICO",
@@ -159,7 +180,6 @@ function buscarSimilar() {
         const cardMestre = document.createElement('div');
         cardMestre.className = 'card-mapeamento';
         
-        // Mantém o nome do arquivo exatamente como definido na base (MAIÚSCULO)
         const imgLexxa = item.lexxa_img 
             ? `<img class="foto-produto" src="${item.lexxa_img}" alt="${item.lexxa_nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">` 
             : '';
